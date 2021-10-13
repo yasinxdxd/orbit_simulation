@@ -52,9 +52,12 @@ App::App()
 : m_window(1920, 1080, "Challenge!"),
   sun("assets/sun256.png", 256, 3000),
   earth("assets/earth.png", 64, 0.01),
-  moon("assets/moon.png", 32, 1)
+  moon("assets/moon.png", 32, 0.0005)
 {
     th.SetFramePerSecond(60);
+    backgroundtex.loadFromFile("assets/bckg.jpg");
+    background.setTexture(backgroundtex);
+    background.setSize({1920, 1080});
 }
 
 void App::Run()
@@ -73,6 +76,7 @@ void App::Run()
     auto dist_earth_sun = Distance(earth.m_sprite.getPosition(), sun.m_sprite.getPosition());
     auto dist_moon_earth = Distance(moon.m_sprite.getPosition(), earth.m_sprite.getPosition());
     earth.velocity = {-5.1, -2.7};
+    moon.velocity = {-3.1, -2.7};
 
     ////////////////////////////////////////////////////////////////////////////////////////////
     go::Texture arrowtex(FAKE_TEXTURE);
@@ -80,7 +84,7 @@ void App::Run()
     arrow.setColor(255, 0, 0);
     arrow.setSize({Distance(earth.m_sprite.getPosition(), earth.m_sprite.getPosition() + earth.acc)*1000, 5});
     arrow.setOrigin({0, arrow.getSize().y / 2});
-    
+    //ActivateGravitionalForce(planets);
 
     while(!m_window.isClose())
     {
@@ -101,15 +105,18 @@ void App::Run()
 
         //if(go::Mouse::isMousePressed(go::Mouse::Left))
         {
-            ActivateGravitionalForce(earth, sun);
-            std::cout << "earth: " << earth.acc.y << std::endl;
-            std::cout << "sun:   " << sun.acc.y << std::endl;
+            ActivateGravitionalForce(planets);
+            //std::cout << "earth: " << earth.acc.y << std::endl;
+            //std::cout << "sun:   " << sun.acc.y << std::endl;
+
         }
 
         //TurnAround(sun, earth, es_angle += 0.2f, dist_earth_sun);
         //TurnAround(earth, moon, me_angle += 3.0f, dist_moon_earth);
 
         m_window.clear();
+        m_window.render(background);
+
         for(auto& p : planets)
             p->draw(m_window);
 
