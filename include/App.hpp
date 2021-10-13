@@ -36,6 +36,9 @@ private:
     Planet moon;
     Planet sun;
 
+    go::Sprite background;
+    go::Texture backgroundtex;
+
 private:
     TimeHandler th;
 
