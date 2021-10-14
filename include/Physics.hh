@@ -54,13 +54,22 @@ static go::Vec2<go::Vec2f> ReturnGravitionalAcceleration(Planet& planet1, Planet
     float dy = planet1.m_sprite.getPosition().y - planet2.m_sprite.getPosition().y;
     float distance = Distance<float>(planet1.m_sprite.getPosition(), planet2.m_sprite.getPosition());
     float Force = CalculateForce(planet1, planet2);
-    
+
     go::Vec2f acc1, acc2;
 
     acc1.x = (Force / planet1.mass) * (-dx / distance);
     acc2.x = (Force / planet2.mass) * (dx / distance);
     acc1.y = (Force / planet1.mass) * (-dy / distance);
     acc2.y = (Force / planet2.mass) * (dy / distance);
+
+    //collision:
+    /*
+    if(distance < (planet1.radius / 2) + (planet2.radius / 2))
+    {
+        planet1.velocity *= -1;//remove
+        planet2.velocity *= -1;//remove
+    }
+    */
 
     return {acc1, acc2};
 }
@@ -69,15 +78,12 @@ static void ActivateGravitionalForce(std::vector<Planet*>& planets)
 {
     std::vector<go::Vec2f> netacc(planets.size(), {0, 0}); //fill with zeros
     std::vector<std::vector<go::Vec2<go::Vec2f>>> arr(planets.size());
-    //std::vector<std::vector<go::Vec2f>> arr(5);
 
-
-    for(size_t i = 0; i < planets.size(); ++i)//planets.size()
+    for(size_t i = 0; i < planets.size(); i++)
     {
-        for(size_t j = i + 1; j < planets.size(); ++j)//planets.size()
+        for(size_t j = i + 1; j < planets.size(); j++)
         {       
             arr[i].push_back(ReturnGravitionalAcceleration(*planets[i], *planets[j]));
-            //arr[i].push_back({(float)i, (float)j});
         }
     }
     
@@ -85,28 +91,23 @@ static void ActivateGravitionalForce(std::vector<Planet*>& planets)
     {
         for(int j = 0; j < arr[i].size(); j++)
         {
-            //std::cout << arr[i][j].x << "," << arr[i][j].y << "  ";
             netacc[i] += arr[i][j].x;
         }
-        //std::cout << std::endl;
     }
     
-    for(int i = 0; i < arr.size(); i++)//int i = arr.size() - 1; i >=0 ; i--
+    for(int i = 0; i < arr.size(); i++)
     {
         int in = 0;
-        for(int j = arr[i].size() - 1; j >= 0 ; --j)//int j = 0; j < arr[i].size(); j++
+        for(int j = arr[i].size() - 1; j >= 0 ; --j)
         {
-            //std::cout << arr[in][j].x << "," << arr[in][j].y << "  ";
-            netacc[i] += arr[in][j].y;
-            //netacc[planets.size() - i - 1] += arr[i][planets.size() - i - 1].y;
+            netacc[arr.size() - i - 1] += arr[in][j].y;
             in++;
         }
-        //std::cout << std::endl;
     }
 
     for(int i = 0; i < planets.size(); i++)
     {
-        planets[i]->acc = netacc[planets.size() - i - 1];
+        planets[i]->acc = netacc[i];
     }
 }
 
